@@ -62,6 +62,17 @@ public sealed class Product
         UpdatedAt = now;
     }
 
+    public void Discontinue(DateTimeOffset now)
+    {
+        if (QuantityReserved > 0)
+        {
+            throw new DomainException($"Cannot discontinue {Sku} while {QuantityReserved} units are reserved by open orders.");
+        }
+
+        IsDiscontinued = true;
+        UpdatedAt = now;
+    }
+
     public void Restock(int quantity, DateTimeOffset now)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(quantity);
@@ -87,11 +98,7 @@ public sealed class Product
     public void Release(int quantity, DateTimeOffset now)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(quantity);
-
-        if (quantity > QuantityReserved)
-        {
-            throw new DomainException($"Cannot release {quantity} units of {Sku}: only {QuantityReserved} are reserved.");
-        }
+        EnsureReserved(quantity, "release");
 
         QuantityReserved -= quantity;
         UpdatedAt = now;
@@ -100,25 +107,10 @@ public sealed class Product
     public void Consume(int quantity, DateTimeOffset now)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(quantity);
-
-        if (quantity > QuantityReserved)
-        {
-            throw new DomainException($"Cannot consume {quantity} units of {Sku}: only {QuantityReserved} are reserved.");
-        }
+        EnsureReserved(quantity, "consume");
 
         QuantityReserved -= quantity;
         QuantityOnHand -= quantity;
-        UpdatedAt = now;
-    }
-
-    public void Discontinue(DateTimeOffset now)
-    {
-        if (QuantityReserved > 0)
-        {
-            throw new DomainException($"Cannot discontinue {Sku} while {QuantityReserved} units are reserved by open orders.");
-        }
-
-        IsDiscontinued = true;
         UpdatedAt = now;
     }
 
@@ -127,6 +119,14 @@ public sealed class Product
         if (IsDiscontinued)
         {
             throw new DomainException($"Product {Sku} is discontinued.");
+        }
+    }
+
+    private void EnsureReserved(int quantity, string action)
+    {
+        if (quantity > QuantityReserved)
+        {
+            throw new DomainException($"Cannot {action} {quantity} units of {Sku}: only {QuantityReserved} are reserved.");
         }
     }
 }

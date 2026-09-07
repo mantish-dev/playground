@@ -34,6 +34,7 @@ dotnet test
 | Method | Route                          | Description                              |
 | ------ | ------------------------------ | ---------------------------------------- |
 | GET    | `/api/products`                | List products (optionally `?activeOnly`) |
+| GET    | `/api/products/low-stock`      | Products at or below `?threshold` (default 5) |
 | GET    | `/api/products/{id}`           | Product details                          |
 | POST   | `/api/products`                | Create a product                         |
 | PUT    | `/api/products/{id}`           | Update name / price                      |

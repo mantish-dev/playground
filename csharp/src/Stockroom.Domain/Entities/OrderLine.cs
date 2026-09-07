@@ -8,8 +8,6 @@ public sealed class OrderLine
 
     public Guid Id { get; private set; }
 
-    public Guid OrderId { get; private set; }
-
     public Guid ProductId { get; private set; }
 
     public string Sku { get; private set; } = string.Empty;
@@ -20,7 +18,7 @@ public sealed class OrderLine
 
     public decimal LineTotal => Quantity * UnitPrice;
 
-    internal static OrderLine Create(Guid orderId, Product product, int quantity)
+    internal static OrderLine Create(Product product, int quantity)
     {
         ArgumentNullException.ThrowIfNull(product);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(quantity);
@@ -28,7 +26,6 @@ public sealed class OrderLine
         return new OrderLine
         {
             Id = Guid.NewGuid(),
-            OrderId = orderId,
             ProductId = product.Id,
             Sku = product.Sku,
             Quantity = quantity,

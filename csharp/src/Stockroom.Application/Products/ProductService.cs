@@ -11,18 +11,23 @@ public sealed class ProductService(
     IClock clock,
     ILogger<ProductService> logger) : IProductService
 {
-    private const int MaxSkuLength = 32;
-    private const int MaxNameLength = 200;
-
     public async Task<IReadOnlyList<ProductDto>> ListAsync(bool activeOnly, CancellationToken cancellationToken)
     {
         var items = await products.ListAsync(activeOnly, cancellationToken);
         return items.Select(ProductDto.From).ToList();
     }
 
+    public async Task<IReadOnlyList<ProductDto>> ListLowStockAsync(int threshold, CancellationToken cancellationToken)
+    {
+        ProductRequestValidator.ValidateThreshold(threshold);
+
+        var items = await products.ListLowStockAsync(threshold, cancellationToken);
+        return items.Select(ProductDto.From).ToList();
+    }
+
     public async Task<ProductDto> GetAsync(Guid id, CancellationToken cancellationToken)
     {
-        var product = await RequireAsync(id, cancellationToken);
+        var product = await GetRequiredAsync(id, cancellationToken);
         return ProductDto.From(product);
     }
 
@@ -30,14 +35,7 @@ public sealed class ProductService(
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        new ValidationErrors()
-            .RequireNotBlank(nameof(request.Sku), request.Sku)
-            .RequireMaxLength(nameof(request.Sku), request.Sku, MaxSkuLength)
-            .RequireNotBlank(nameof(request.Name), request.Name)
-            .RequireMaxLength(nameof(request.Name), request.Name, MaxNameLength)
-            .RequireNonNegative(nameof(request.UnitPrice), request.UnitPrice)
-            .RequireNonNegative(nameof(request.InitialStock), request.InitialStock)
-            .ThrowIfAny();
+        ProductRequestValidator.Validate(request);
 
         var sku = request.Sku.Trim().ToUpperInvariant();
         if (await products.ExistsBySkuAsync(sku, cancellationToken))
@@ -57,13 +55,9 @@ public sealed class ProductService(
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        new ValidationErrors()
-            .RequireNotBlank(nameof(request.Name), request.Name)
-            .RequireMaxLength(nameof(request.Name), request.Name, MaxNameLength)
-            .RequireNonNegative(nameof(request.UnitPrice), request.UnitPrice)
-            .ThrowIfAny();
+        ProductRequestValidator.Validate(request);
 
-        var product = await RequireAsync(id, cancellationToken);
+        var product = await GetRequiredAsync(id, cancellationToken);
         var now = clock.UtcNow;
         product.Rename(request.Name, now);
         product.ChangePrice(request.UnitPrice, now);
@@ -76,11 +70,9 @@ public sealed class ProductService(
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        new ValidationErrors()
-            .RequirePositive(nameof(request.Quantity), request.Quantity)
-            .ThrowIfAny();
+        ProductRequestValidator.Validate(request);
 
-        var product = await RequireAsync(id, cancellationToken);
+        var product = await GetRequiredAsync(id, cancellationToken);
         product.Restock(request.Quantity, clock.UtcNow);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
@@ -90,14 +82,14 @@ public sealed class ProductService(
 
     public async Task DiscontinueAsync(Guid id, CancellationToken cancellationToken)
     {
-        var product = await RequireAsync(id, cancellationToken);
+        var product = await GetRequiredAsync(id, cancellationToken);
         product.Discontinue(clock.UtcNow);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         logger.ProductDiscontinued(product.Sku);
     }
 
-    private async Task<Product> RequireAsync(Guid id, CancellationToken cancellationToken)
+    private async Task<Product> GetRequiredAsync(Guid id, CancellationToken cancellationToken)
     {
         return await products.GetByIdAsync(id, cancellationToken)
             ?? throw new NotFoundException(nameof(Product), id);

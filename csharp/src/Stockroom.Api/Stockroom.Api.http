@@ -15,6 +15,9 @@ Content-Type: application/json
 ### List active products
 GET {{host}}/api/products?activeOnly=true
 
+### Products running low
+GET {{host}}/api/products/low-stock?threshold=10
+
 ### Place an order
 POST {{host}}/api/orders
 Content-Type: application/json

@@ -47,7 +47,7 @@ public sealed class Order
             }
 
             product.Reserve(quantity, now);
-            order._lines.Add(OrderLine.Create(order.Id, product, quantity));
+            order._lines.Add(OrderLine.Create(product, quantity));
         }
 
         if (order._lines.Count == 0)
