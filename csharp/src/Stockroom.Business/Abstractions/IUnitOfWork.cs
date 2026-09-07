@@ -1,4 +1,4 @@
-namespace Stockroom.Application.Abstractions;
+namespace Stockroom.Business.Abstractions;
 
 public interface IUnitOfWork
 {

@@ -15,5 +15,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../src/Stockroom.Application/Stockroom.Application.csproj" />
+    <ProjectReference Include="../../src/Stockroom.Business/Stockroom.Business.csproj" />
   </ItemGroup>
 </Project>

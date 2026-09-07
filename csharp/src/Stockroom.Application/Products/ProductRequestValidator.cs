@@ -1,4 +1,4 @@
-using Stockroom.Application.Common;
+using Stockroom.Business.Validation;
 
 namespace Stockroom.Application.Products;
 

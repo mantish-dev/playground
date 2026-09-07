@@ -1,4 +1,4 @@
-using Stockroom.Application.Abstractions;
+using Stockroom.Business.Abstractions;
 
 namespace Stockroom.Infrastructure.Time;
 

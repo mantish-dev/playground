@@ -1,12 +1,14 @@
 using Microsoft.Extensions.Logging;
-using Stockroom.Application.Abstractions;
-using Stockroom.Application.Common;
+using Stockroom.Business.Abstractions;
+using Stockroom.Business.Exceptions;
+using Stockroom.Business.Products;
 using Stockroom.Domain.Entities;
 
 namespace Stockroom.Application.Products;
 
 public sealed class ProductService(
     IProductRepository products,
+    IProductCatalog catalog,
     IUnitOfWork unitOfWork,
     IClock clock,
     ILogger<ProductService> logger) : IProductService
@@ -37,14 +39,7 @@ public sealed class ProductService(
 
         ProductRequestValidator.Validate(request);
 
-        var sku = request.Sku.Trim().ToUpperInvariant();
-        if (await products.ExistsBySkuAsync(sku, cancellationToken))
-        {
-            throw new ConflictException($"A product with SKU {sku} already exists.");
-        }
-
-        var product = Product.Create(sku, request.Name, request.UnitPrice, request.InitialStock, clock.UtcNow);
-        products.Add(product);
+        var product = await catalog.RegisterAsync(request.Sku, request.Name, request.UnitPrice, request.InitialStock, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         logger.ProductCreated(product.Sku, product.Id);

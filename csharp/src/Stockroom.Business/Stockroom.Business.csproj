@@ -1,9 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <InternalsVisibleTo Include="Stockroom.Tests" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="../Stockroom.Business/Stockroom.Business.csproj" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Stockroom.Domain/Stockroom.Domain.csproj" />
   </ItemGroup>
 </Project>

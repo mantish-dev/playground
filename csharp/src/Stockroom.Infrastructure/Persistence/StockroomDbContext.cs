@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Stockroom.Application.Abstractions;
+using Stockroom.Business.Abstractions;
 using Stockroom.Domain.Entities;
 
 namespace Stockroom.Infrastructure.Persistence;
