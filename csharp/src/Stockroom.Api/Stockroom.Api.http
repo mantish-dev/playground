@@ -1,0 +1,30 @@
+@host = http://localhost:5080
+
+### Create a product
+# @name createProduct
+POST {{host}}/api/products
+Content-Type: application/json
+
+{
+  "sku": "WIDGET-001",
+  "name": "Widget",
+  "unitPrice": 12.50,
+  "initialStock": 100
+}
+
+### List active products
+GET {{host}}/api/products?activeOnly=true
+
+### Place an order
+POST {{host}}/api/orders
+Content-Type: application/json
+
+{
+  "customerEmail": "buyer@example.com",
+  "lines": [
+    { "productId": "{{createProduct.response.body.id}}", "quantity": 3 }
+  ]
+}
+
+### List pending orders
+GET {{host}}/api/orders?status=Pending
