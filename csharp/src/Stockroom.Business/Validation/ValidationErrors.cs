@@ -1,4 +1,6 @@
-namespace Stockroom.Application.Common;
+using Stockroom.Business.Exceptions;
+
+namespace Stockroom.Business.Validation;
 
 /// <summary>
 /// Collects field-level validation failures and raises a single <see cref="ValidationException"/>.

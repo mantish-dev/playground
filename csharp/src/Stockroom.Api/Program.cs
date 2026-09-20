@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using Serilog;
 using Stockroom.Api.Middleware;
 using Stockroom.Application;
+using Stockroom.Business;
 using Stockroom.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +20,7 @@ builder.Services.AddProblemDetails();
 builder.Services.AddHealthChecks();
 
 builder.Services.AddApplication();
+builder.Services.AddBusiness();
 builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();

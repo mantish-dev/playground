@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging.Abstractions;
-using Stockroom.Application.Common;
+using Stockroom.Business.Exceptions;
+using Stockroom.Business.Orders;
 using Stockroom.Application.Orders;
 using Stockroom.Domain.Entities;
 using Stockroom.Domain.Exceptions;
@@ -17,7 +18,7 @@ public sealed class OrderServiceTests
 
     public OrderServiceTests()
     {
-        _sut = new OrderService(_orders, _products, _unitOfWork, _clock, NullLogger<OrderService>.Instance);
+        _sut = new OrderService(_orders, new OrderWorkflow(_products, _clock), _unitOfWork, NullLogger<OrderService>.Instance);
     }
 
     [Fact]

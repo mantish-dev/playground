@@ -8,6 +8,6 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="../Stockroom.Application/Stockroom.Application.csproj" />
+    <ProjectReference Include="../Stockroom.Business/Stockroom.Business.csproj" />
   </ItemGroup>
 </Project>

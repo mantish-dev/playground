@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Stockroom.Application.Abstractions;
+using Stockroom.Business.Abstractions;
 using Stockroom.Infrastructure.Persistence;
 using Stockroom.Infrastructure.Persistence.Repositories;
 using Stockroom.Infrastructure.Time;

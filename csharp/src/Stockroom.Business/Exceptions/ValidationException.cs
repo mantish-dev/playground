@@ -1,4 +1,4 @@
-namespace Stockroom.Application.Common;
+namespace Stockroom.Business.Exceptions;
 
 public sealed class ValidationException : Exception
 {

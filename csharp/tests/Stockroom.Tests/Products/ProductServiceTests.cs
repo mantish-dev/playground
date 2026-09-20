@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging.Abstractions;
-using Stockroom.Application.Common;
+using Stockroom.Business.Exceptions;
+using Stockroom.Business.Products;
 using Stockroom.Application.Products;
 using Stockroom.Domain.Exceptions;
 using Stockroom.Tests.Fakes;
@@ -15,7 +16,7 @@ public sealed class ProductServiceTests
 
     public ProductServiceTests()
     {
-        _sut = new ProductService(_products, _unitOfWork, _clock, NullLogger<ProductService>.Instance);
+        _sut = new ProductService(_products, new ProductCatalog(_products, _clock), _unitOfWork, _clock, NullLogger<ProductService>.Instance);
     }
 
     [Fact]

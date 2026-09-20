@@ -7,7 +7,9 @@ layered architecture.
 ```
 src/
   Stockroom.Domain          entities, invariants, domain exceptions (no dependencies)
-  Stockroom.Application     use cases, DTOs, repository and clock abstractions
+  Stockroom.Business        business rules over the domain: order workflow, product catalogue,
+                            repository and clock abstractions, validation primitives
+  Stockroom.Application     use cases: request validation, DTO mapping, persistence, logging
   Stockroom.Infrastructure  EF Core + SQLite persistence, system clock
   Stockroom.Api             controllers, error handling, composition root
 tests/

@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using Stockroom.Application.Common;
+using Stockroom.Business.Exceptions;
 using Stockroom.Domain.Exceptions;
 
 namespace Stockroom.Api.Middleware;

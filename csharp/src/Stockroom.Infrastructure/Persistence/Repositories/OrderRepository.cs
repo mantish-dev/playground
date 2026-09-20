@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Stockroom.Application.Abstractions;
+using Stockroom.Business.Abstractions;
 using Stockroom.Domain.Entities;
 
 namespace Stockroom.Infrastructure.Persistence.Repositories;
