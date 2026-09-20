@@ -81,6 +81,27 @@ public sealed class ProductServiceTests
     }
 
     [Fact]
+    public async Task ListLowStock_returns_active_products_at_or_below_threshold()
+    {
+        var low = await _sut.CreateAsync(new CreateProductRequest("LOW", "Low", 1m, 2), TestContext.Current.CancellationToken);
+        var edge = await _sut.CreateAsync(new CreateProductRequest("EDGE", "Edge", 1m, 5), TestContext.Current.CancellationToken);
+        await _sut.CreateAsync(new CreateProductRequest("FULL", "Full", 1m, 50), TestContext.Current.CancellationToken);
+        var gone = await _sut.CreateAsync(new CreateProductRequest("GONE", "Gone", 1m, 0), TestContext.Current.CancellationToken);
+        await _sut.DiscontinueAsync(gone.Id, TestContext.Current.CancellationToken);
+
+        var result = await _sut.ListLowStockAsync(5, TestContext.Current.CancellationToken);
+
+        Assert.Equal([low.Id, edge.Id], result.Select(p => p.Id));
+    }
+
+    [Fact]
+    public async Task ListLowStock_rejects_negative_threshold()
+    {
+        await Assert.ThrowsAsync<ValidationException>(() =>
+            _sut.ListLowStockAsync(-1, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
     public async Task List_active_only_hides_discontinued()
     {
         var keep = await _sut.CreateAsync(new CreateProductRequest("KEEP", "Keep", 1m, 0), TestContext.Current.CancellationToken);

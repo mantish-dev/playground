@@ -36,6 +36,16 @@ internal sealed class ProductRepository(StockroomDbContext dbContext) : IProduct
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyList<Product>> ListLowStockAsync(int threshold, CancellationToken cancellationToken)
+    {
+        return await dbContext.Products
+            .Where(p => !p.IsDiscontinued)
+            .Where(p => p.QuantityOnHand - p.QuantityReserved <= threshold)
+            .OrderBy(p => p.QuantityOnHand - p.QuantityReserved)
+            .ThenBy(p => p.Sku)
+            .ToListAsync(cancellationToken);
+    }
+
     public void Add(Product product)
     {
         dbContext.Products.Add(product);

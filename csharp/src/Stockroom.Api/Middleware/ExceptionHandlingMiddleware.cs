@@ -31,6 +31,7 @@ public sealed class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Ex
             }
 
             problem.Instance = context.Request.Path;
+            problem.Extensions["traceId"] = context.TraceIdentifier;
             context.Response.StatusCode = problem.Status!.Value;
             await context.Response.WriteAsJsonAsync(problem, problem.GetType(), context.RequestAborted);
         }

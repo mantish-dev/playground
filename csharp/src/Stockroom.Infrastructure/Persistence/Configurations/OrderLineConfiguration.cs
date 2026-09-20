@@ -20,7 +20,7 @@ internal sealed class OrderLineConfiguration : IEntityTypeConfiguration<OrderLin
             .HasForeignKey(l => l.ProductId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasIndex(l => new { l.OrderId, l.ProductId }).IsUnique();
+        builder.HasIndex("OrderId", nameof(OrderLine.ProductId)).IsUnique();
 
         builder.Ignore(l => l.LineTotal);
     }

@@ -16,6 +16,15 @@ public sealed class ProductsController(IProductService productService) : Control
         return Ok(products);
     }
 
+    [HttpGet("low-stock")]
+    [ProducesResponseType<IReadOnlyList<ProductDto>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<IReadOnlyList<ProductDto>>> ListLowStock([FromQuery] int threshold = 5, CancellationToken cancellationToken = default)
+    {
+        var products = await productService.ListLowStockAsync(threshold, cancellationToken);
+        return Ok(products);
+    }
+
     [HttpGet("{id:guid}")]
     [ProducesResponseType<ProductDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]

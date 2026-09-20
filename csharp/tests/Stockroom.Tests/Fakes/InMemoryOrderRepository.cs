@@ -18,6 +18,7 @@ internal sealed class InMemoryOrderRepository : IOrderRepository
             .Where(o => status is null || o.Status == status)
             .OrderByDescending(o => o.PlacedAt)
             .ToList();
+
         return Task.FromResult(items);
     }
 

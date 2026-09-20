@@ -34,6 +34,16 @@ internal sealed class InMemoryProductRepository : IProductRepository
         return Task.FromResult(items);
     }
 
+    public Task<IReadOnlyList<Product>> ListLowStockAsync(int threshold, CancellationToken cancellationToken)
+    {
+        IReadOnlyList<Product> items = _products.Values
+            .Where(p => !p.IsDiscontinued && p.QuantityAvailable <= threshold)
+            .OrderBy(p => p.QuantityAvailable)
+            .ThenBy(p => p.Sku, StringComparer.Ordinal)
+            .ToList();
+        return Task.FromResult(items);
+    }
+
     public void Add(Product product)
     {
         _products[product.Id] = product;

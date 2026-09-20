@@ -20,9 +20,12 @@ internal sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
 
         builder.Ignore(o => o.Total);
 
+        // The line never needs to know its order's id: EF keeps the foreign key as a shadow
+        // property so the domain model does not carry a persistence-only field.
         builder.HasMany(o => o.Lines)
             .WithOne()
-            .HasForeignKey(l => l.OrderId)
+            .HasForeignKey("OrderId")
+            .IsRequired()
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.Navigation(o => o.Lines)
