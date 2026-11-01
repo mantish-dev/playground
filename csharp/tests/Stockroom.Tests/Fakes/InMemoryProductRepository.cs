@@ -14,9 +14,9 @@ internal sealed class InMemoryProductRepository : IProductRepository
         return Task.FromResult(_products.GetValueOrDefault(id));
     }
 
-    public Task<IReadOnlyList<Product>> GetByIdsAsync(IReadOnlyCollection<Guid> ids, CancellationToken cancellationToken)
+    public Task<IReadOnlyList<Product>> FindManyAsync(IReadOnlyCollection<Guid> productIds, CancellationToken cancellationToken)
     {
-        IReadOnlyList<Product> found = ids.Where(_products.ContainsKey).Select(id => _products[id]).ToList();
+        IReadOnlyList<Product> found = productIds.Where(_products.ContainsKey).Select(id => _products[id]).ToList();
         return Task.FromResult(found);
     }
 

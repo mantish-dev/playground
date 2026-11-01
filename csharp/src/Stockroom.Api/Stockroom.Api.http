@@ -9,8 +9,20 @@ Content-Type: application/json
   "sku": "WIDGET-001",
   "name": "Widget",
   "unitPrice": 12.50,
-  "initialStock": 100
+  "initialStock": 100,
+  "reorderThreshold": 10
 }
+
+### Change a product's reorder threshold
+PUT {{host}}/api/products/{{createProduct.response.body.id}}/reorder-threshold
+Content-Type: application/json
+
+{
+  "reorderThreshold": 20
+}
+
+### List products that need reordering
+GET {{host}}/api/stock-alerts
 
 ### List active products
 GET {{host}}/api/products?activeOnly=true

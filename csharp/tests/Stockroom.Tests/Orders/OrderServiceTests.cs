@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging.Abstractions;
+using Stockroom.Application.Alerts;
 using Stockroom.Application.Common;
 using Stockroom.Application.Orders;
 using Stockroom.Domain.Entities;
@@ -13,11 +14,13 @@ public sealed class OrderServiceTests
     private readonly InMemoryProductRepository _products = new();
     private readonly InMemoryUnitOfWork _unitOfWork = new();
     private readonly FixedClock _clock = new(FixedClock.Default);
+    private readonly RecordingStockAlertNotifier _notifier = new();
     private readonly OrderService _sut;
 
     public OrderServiceTests()
     {
-        _sut = new OrderService(_orders, _products, _unitOfWork, _clock, NullLogger<OrderService>.Instance);
+        var stockAlerts = new StockAlertService(_products, _notifier);
+        _sut = new OrderService(_orders, _products, _unitOfWork, _clock, stockAlerts, NullLogger<OrderService>.Instance);
     }
 
     [Fact]
@@ -80,6 +83,32 @@ public sealed class OrderServiceTests
         Assert.Equal(FixedClock.Default.AddDays(1), shipped.ShippedAt);
         Assert.Equal(6, widget.QuantityOnHand);
         Assert.Equal(0, widget.QuantityReserved);
+    }
+
+    [Fact]
+    public async Task Ship_alerts_when_stock_falls_to_the_reorder_threshold()
+    {
+        var widget = AddProduct("WIDGET", 10m, stock: 10);
+        widget.ChangeReorderThreshold(3, _clock.UtcNow);
+        var gadget = AddProduct("GADGET", 2.5m, stock: 10);
+        var placed = await _sut.PlaceAsync(Request(widget, 7, gadget, 1), TestContext.Current.CancellationToken);
+
+        await _sut.ShipAsync(placed.Id, TestContext.Current.CancellationToken);
+
+        var alert = Assert.Single(Assert.Single(_notifier.Batches));
+        Assert.Equal("WIDGET", alert.Sku);
+        Assert.Equal(3, alert.QuantityAvailable);
+    }
+
+    [Fact]
+    public async Task Place_rejects_an_address_without_a_mailbox()
+    {
+        var widget = AddProduct("WIDGET", 10m, stock: 10);
+        var request = new PlaceOrderRequest("@example.com", [new PlaceOrderLineRequest(widget.Id, 1)]);
+
+        var ex = await Assert.ThrowsAsync<ValidationException>(() => _sut.PlaceAsync(request, TestContext.Current.CancellationToken));
+
+        Assert.Equal(["CustomerEmail"], ex.Errors.Keys);
     }
 
     [Fact]

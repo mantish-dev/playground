@@ -11,10 +11,10 @@ internal sealed class ProductRepository(StockroomDbContext dbContext) : IProduct
         return dbContext.Products.SingleOrDefaultAsync(p => p.Id == id, cancellationToken);
     }
 
-    public async Task<IReadOnlyList<Product>> GetByIdsAsync(IReadOnlyCollection<Guid> ids, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<Product>> FindManyAsync(IReadOnlyCollection<Guid> productIds, CancellationToken cancellationToken)
     {
         return await dbContext.Products
-            .Where(p => ids.Contains(p.Id))
+            .Where(p => productIds.Contains(p.Id))
             .ToListAsync(cancellationToken);
     }
 

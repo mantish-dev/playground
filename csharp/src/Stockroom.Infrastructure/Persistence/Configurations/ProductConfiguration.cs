@@ -18,10 +18,12 @@ internal sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(p => p.UnitPrice).HasPrecision(18, 2);
         builder.Property(p => p.QuantityOnHand).IsRequired();
         builder.Property(p => p.QuantityReserved).IsRequired();
+        builder.Property(p => p.ReorderThreshold).IsRequired();
         builder.Property(p => p.IsDiscontinued).IsRequired();
         builder.Property(p => p.CreatedAt).IsRequired();
         builder.Property(p => p.UpdatedAt).IsRequired().IsConcurrencyToken();
 
         builder.Ignore(p => p.QuantityAvailable);
+        builder.Ignore(p => p.NeedsReorder);
     }
 }

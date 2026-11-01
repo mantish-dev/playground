@@ -26,6 +26,8 @@ public sealed class Order
 
     public decimal Total => _lines.Sum(l => l.LineTotal);
 
+    public IReadOnlyList<Guid> ProductIds => _lines.Select(l => l.ProductId).ToList();
+
     public static Order Place(string customerEmail, IEnumerable<(Product Product, int Quantity)> items, DateTimeOffset now)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(customerEmail);
@@ -86,11 +88,11 @@ public sealed class Order
         CancelledAt = now;
     }
 
-    private static Product ResolveProduct(IReadOnlyDictionary<Guid, Product> products, OrderLine line)
+    private Product ResolveProduct(IReadOnlyDictionary<Guid, Product> products, OrderLine line)
     {
         if (!products.TryGetValue(line.ProductId, out var product))
         {
-            throw new DomainException($"Product {line.Sku} referenced by the order was not supplied.");
+            throw new DomainException($"Product {line.Sku} on order {Id} was not supplied.");
         }
 
         return product;

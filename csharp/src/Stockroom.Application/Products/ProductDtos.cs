@@ -10,6 +10,7 @@ public sealed record ProductDto(
     int QuantityOnHand,
     int QuantityReserved,
     int QuantityAvailable,
+    int ReorderThreshold,
     bool IsDiscontinued,
     DateTimeOffset CreatedAt,
     DateTimeOffset UpdatedAt)
@@ -26,14 +27,17 @@ public sealed record ProductDto(
             product.QuantityOnHand,
             product.QuantityReserved,
             product.QuantityAvailable,
+            product.ReorderThreshold,
             product.IsDiscontinued,
             product.CreatedAt,
             product.UpdatedAt);
     }
 }
 
-public sealed record CreateProductRequest(string Sku, string Name, decimal UnitPrice, int InitialStock);
+public sealed record CreateProductRequest(string Sku, string Name, decimal UnitPrice, int InitialStock, int? ReorderThreshold = null);
 
 public sealed record UpdateProductRequest(string Name, decimal UnitPrice);
 
 public sealed record RestockRequest(int Quantity);
+
+public sealed record ChangeReorderThresholdRequest(int ReorderThreshold);

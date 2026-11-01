@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Stockroom.Application.Abstractions;
+using Stockroom.Application.Alerts;
 using Stockroom.Application.Common;
 using Stockroom.Domain.Entities;
 
@@ -9,6 +11,7 @@ public sealed class ProductService(
     IProductRepository products,
     IUnitOfWork unitOfWork,
     IClock clock,
+    IOptions<StockAlertOptions> alertOptions,
     ILogger<ProductService> logger) : IProductService
 {
     private const int MaxSkuLength = 32;
@@ -37,6 +40,7 @@ public sealed class ProductService(
             .RequireMaxLength(nameof(request.Name), request.Name, MaxNameLength)
             .RequireNonNegative(nameof(request.UnitPrice), request.UnitPrice)
             .RequireNonNegative(nameof(request.InitialStock), request.InitialStock)
+            .RequireNonNegative(nameof(request.ReorderThreshold), request.ReorderThreshold ?? 0)
             .ThrowIfAny();
 
         var sku = request.Sku.Trim().ToUpperInvariant();
@@ -45,7 +49,9 @@ public sealed class ProductService(
             throw new ConflictException($"A product with SKU {sku} already exists.");
         }
 
-        var product = Product.Create(sku, request.Name, request.UnitPrice, request.InitialStock, clock.UtcNow);
+        var now = clock.UtcNow;
+        var product = Product.Create(sku, request.Name, request.UnitPrice, request.InitialStock, now);
+        product.ChangeReorderThreshold(request.ReorderThreshold ?? alertOptions.Value.DefaultReorderThreshold, now);
         products.Add(product);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
@@ -85,6 +91,22 @@ public sealed class ProductService(
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         logger.ProductRestocked(product.Sku, request.Quantity, product.QuantityOnHand);
+        return ProductDto.From(product);
+    }
+
+    public async Task<ProductDto> ChangeReorderThresholdAsync(Guid id, ChangeReorderThresholdRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        new ValidationErrors()
+            .RequireNonNegative(nameof(request.ReorderThreshold), request.ReorderThreshold)
+            .ThrowIfAny();
+
+        var product = await RequireAsync(id, cancellationToken);
+        product.ChangeReorderThreshold(request.ReorderThreshold, clock.UtcNow);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        logger.ReorderThresholdChanged(product.Sku, product.ReorderThreshold);
         return ProductDto.From(product);
     }
 

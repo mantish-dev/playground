@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Stockroom.Application.Abstractions;
+using Stockroom.Application.Alerts;
+using Stockroom.Infrastructure.Alerts;
 using Stockroom.Infrastructure.Persistence;
 using Stockroom.Infrastructure.Persistence.Repositories;
 using Stockroom.Infrastructure.Time;
@@ -24,6 +26,7 @@ public static class DependencyInjection
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<IOrderRepository, OrderRepository>();
         services.AddSingleton<IClock, SystemClock>();
+        services.AddSingleton<IStockAlertNotifier, LoggingStockAlertNotifier>();
         services.AddHostedService<DatabaseInitializer>();
 
         return services;

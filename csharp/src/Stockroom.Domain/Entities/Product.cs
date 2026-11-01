@@ -20,6 +20,8 @@ public sealed class Product
 
     public int QuantityReserved { get; private set; }
 
+    public int ReorderThreshold { get; private set; }
+
     public bool IsDiscontinued { get; private set; }
 
     public DateTimeOffset CreatedAt { get; private set; }
@@ -27,6 +29,8 @@ public sealed class Product
     public DateTimeOffset UpdatedAt { get; private set; }
 
     public int QuantityAvailable => QuantityOnHand - QuantityReserved;
+
+    public bool NeedsReorder => !IsDiscontinued && QuantityAvailable <= ReorderThreshold;
 
     public static Product Create(string sku, string name, decimal unitPrice, int initialStock, DateTimeOffset now)
     {
@@ -62,9 +66,16 @@ public sealed class Product
         UpdatedAt = now;
     }
 
+    public void ChangeReorderThreshold(int reorderThreshold, DateTimeOffset now)
+    {
+        DomainGuard.NotNegative(reorderThreshold);
+        ReorderThreshold = reorderThreshold;
+        UpdatedAt = now;
+    }
+
     public void Restock(int quantity, DateTimeOffset now)
     {
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(quantity);
+        DomainGuard.Positive(quantity);
         EnsureActive();
         QuantityOnHand += quantity;
         UpdatedAt = now;
@@ -72,7 +83,7 @@ public sealed class Product
 
     public void Reserve(int quantity, DateTimeOffset now)
     {
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(quantity);
+        DomainGuard.Positive(quantity);
         EnsureActive();
 
         if (quantity > QuantityAvailable)
@@ -86,7 +97,7 @@ public sealed class Product
 
     public void Release(int quantity, DateTimeOffset now)
     {
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(quantity);
+        DomainGuard.Positive(quantity);
 
         if (quantity > QuantityReserved)
         {
@@ -99,7 +110,7 @@ public sealed class Product
 
     public void Consume(int quantity, DateTimeOffset now)
     {
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(quantity);
+        DomainGuard.Positive(quantity);
 
         if (quantity > QuantityReserved)
         {
