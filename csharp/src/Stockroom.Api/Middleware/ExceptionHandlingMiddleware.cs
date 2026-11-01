@@ -5,8 +5,8 @@ using Stockroom.Domain.Exceptions;
 namespace Stockroom.Api.Middleware;
 
 /// <summary>
-/// Maps application and domain exceptions onto RFC 9457 problem details. Anything unrecognised
-/// is logged and surfaced as a 500 without leaking the exception to the caller.
+/// Maps application and domain exceptions onto RFC 9457 problem details; anything unrecognized
+/// is logged, and surfaced as a 500 without leaking the exception to the caller.
 /// </summary>
 public sealed class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
 {
@@ -41,42 +41,47 @@ public sealed class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Ex
         ValidationException validation => new ValidationProblemDetails(validation.Errors.ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.Ordinal))
         {
             Status = StatusCodes.Status400BadRequest,
-            Title = "Validation failed",
+            Title = "Validation Failed",
         },
+
         NotFoundException notFound => new ProblemDetails
         {
             Status = StatusCodes.Status404NotFound,
-            Title = "Resource not found",
+            Title = "Resource Not Found",
             Detail = notFound.Message,
         },
+
         ConflictException conflict => new ProblemDetails
         {
             Status = StatusCodes.Status409Conflict,
             Title = "Conflict",
             Detail = conflict.Message,
         },
+
         InsufficientStockException stock => new ProblemDetails
         {
             Status = StatusCodes.Status409Conflict,
-            Title = "Insufficient stock",
+            Title = "Insufficient Stock",
             Detail = stock.Message,
             Extensions =
             {
-                ["sku"] = stock.Sku,
+                ["sku"]       = stock.Sku,
                 ["requested"] = stock.Requested,
                 ["available"] = stock.Available,
             },
         },
+
         DomainException domain => new ProblemDetails
         {
             Status = StatusCodes.Status422UnprocessableEntity,
-            Title = "Business rule violated",
+            Title = "Business Rule Violated",
             Detail = domain.Message,
         },
+
         _ => new ProblemDetails
         {
             Status = StatusCodes.Status500InternalServerError,
-            Title = "An unexpected error occurred",
+            Title = "An Unexpected Error Occurred",
         },
     };
 }

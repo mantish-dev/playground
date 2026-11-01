@@ -12,4 +12,7 @@ internal static partial class ProductServiceLog
 
     [LoggerMessage(EventId = 1002, Level = LogLevel.Information, Message = "Discontinued product {Sku}")]
     public static partial void ProductDiscontinued(this ILogger logger, string sku);
+
+    [LoggerMessage(EventId = 1003, Level = LogLevel.Information, Message = "Reorder threshold of {Sku} set to {ReorderThreshold}")]
+    public static partial void ReorderThresholdChanged(this ILogger logger, string sku, int reorderThreshold);
 }

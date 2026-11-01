@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Stockroom.Application.Alerts;
 using Stockroom.Application.Orders;
 using Stockroom.Application.Products;
 
@@ -10,6 +11,7 @@ public static class DependencyInjection
     {
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IOrderService, OrderService>();
+        services.AddScoped<IStockAlertService, StockAlertService>();
         return services;
     }
 }

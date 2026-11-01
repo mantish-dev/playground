@@ -14,11 +14,11 @@ internal sealed class OrderRepository(StockroomDbContext dbContext) : IOrderRepo
     public async Task<IReadOnlyList<Order>> ListAsync(OrderStatus? status, CancellationToken cancellationToken)
     {
         IQueryable<Order> query = dbContext.Orders;
+
         if (status is { } s)
         {
             query = query.Where(o => o.Status == s);
         }
-
         return await query
             .OrderByDescending(o => o.PlacedAt)
             .ToListAsync(cancellationToken);

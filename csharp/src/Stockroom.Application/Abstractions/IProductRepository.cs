@@ -6,7 +6,7 @@ public interface IProductRepository
 {
     Task<Product?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
 
-    Task<IReadOnlyList<Product>> GetByIdsAsync(IReadOnlyCollection<Guid> ids, CancellationToken cancellationToken);
+    Task<IReadOnlyList<Product>> FindManyAsync(IReadOnlyCollection<Guid> productIds, CancellationToken cancellationToken);
 
     Task<bool> ExistsBySkuAsync(string sku, CancellationToken cancellationToken);
 

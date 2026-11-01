@@ -1,4 +1,6 @@
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
+using Stockroom.Application.Alerts;
 using Stockroom.Application.Common;
 using Stockroom.Application.Products;
 using Stockroom.Domain.Exceptions;
@@ -15,7 +17,8 @@ public sealed class ProductServiceTests
 
     public ProductServiceTests()
     {
-        _sut = new ProductService(_products, _unitOfWork, _clock, NullLogger<ProductService>.Instance);
+        var alertOptions = Options.Create(new StockAlertOptions { DefaultReorderThreshold = 4 });
+        _sut = new ProductService(_products, _unitOfWork, _clock, alertOptions, NullLogger<ProductService>.Instance);
     }
 
     [Fact]
@@ -69,6 +72,27 @@ public sealed class ProductServiceTests
 
         await Assert.ThrowsAsync<DomainException>(() =>
             _sut.RestockAsync(created.Id, new RestockRequest(1), TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task Create_takes_the_default_reorder_threshold_unless_one_is_given()
+    {
+        var defaulted = await _sut.CreateAsync(new CreateProductRequest("A", "A", 1m, 5), TestContext.Current.CancellationToken);
+        var explicitThreshold = await _sut.CreateAsync(new CreateProductRequest("B", "B", 1m, 5, ReorderThreshold: 0), TestContext.Current.CancellationToken);
+
+        Assert.Equal(4, defaulted.ReorderThreshold);
+        Assert.Equal(0, explicitThreshold.ReorderThreshold);
+    }
+
+    [Fact]
+    public async Task Change_reorder_threshold_rejects_a_negative_value()
+    {
+        var created = await _sut.CreateAsync(new CreateProductRequest("A", "A", 1m, 5), TestContext.Current.CancellationToken);
+
+        var ex = await Assert.ThrowsAsync<ValidationException>(() =>
+            _sut.ChangeReorderThresholdAsync(created.Id, new ChangeReorderThresholdRequest(-1), TestContext.Current.CancellationToken));
+
+        Assert.Equal(["ReorderThreshold"], ex.Errors.Keys);
     }
 
     [Fact]

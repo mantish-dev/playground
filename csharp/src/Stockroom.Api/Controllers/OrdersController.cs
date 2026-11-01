@@ -14,6 +14,7 @@ public sealed class OrdersController(IOrderService orderService) : ControllerBas
     public async Task<ActionResult<IReadOnlyList<OrderDto>>> List([FromQuery] OrderStatus? status, CancellationToken cancellationToken)
     {
         var orders = await orderService.ListAsync(status, cancellationToken);
+
         return Ok(orders);
     }
 
@@ -23,6 +24,7 @@ public sealed class OrdersController(IOrderService orderService) : ControllerBas
     public async Task<ActionResult<OrderDto>> Get(Guid id, CancellationToken cancellationToken)
     {
         var order = await orderService.GetAsync(id, cancellationToken);
+
         return Ok(order);
     }
 
@@ -35,6 +37,7 @@ public sealed class OrdersController(IOrderService orderService) : ControllerBas
     public async Task<ActionResult<OrderDto>> Place([FromBody] PlaceOrderRequest request, CancellationToken cancellationToken)
     {
         var order = await orderService.PlaceAsync(request, cancellationToken);
+
         return CreatedAtAction(nameof(Get), new { id = order.Id }, order);
     }
 
@@ -45,6 +48,7 @@ public sealed class OrdersController(IOrderService orderService) : ControllerBas
     public async Task<ActionResult<OrderDto>> Ship(Guid id, CancellationToken cancellationToken)
     {
         var order = await orderService.ShipAsync(id, cancellationToken);
+
         return Ok(order);
     }
 
@@ -55,6 +59,7 @@ public sealed class OrdersController(IOrderService orderService) : ControllerBas
     public async Task<ActionResult<OrderDto>> Cancel(Guid id, CancellationToken cancellationToken)
     {
         var order = await orderService.CancelAsync(id, cancellationToken);
+
         return Ok(order);
     }
 }

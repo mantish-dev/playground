@@ -1,3 +1,5 @@
+using Stockroom.Domain.Exceptions;
+
 namespace Stockroom.Domain.Entities;
 
 public sealed class OrderLine
@@ -23,7 +25,7 @@ public sealed class OrderLine
     internal static OrderLine Create(Guid orderId, Product product, int quantity)
     {
         ArgumentNullException.ThrowIfNull(product);
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(quantity);
+        DomainGuard.Positive(quantity);
 
         return new OrderLine
         {

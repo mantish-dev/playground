@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using Serilog;
 using Stockroom.Api.Middleware;
 using Stockroom.Application;
+using Stockroom.Application.Alerts;
 using Stockroom.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +19,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
 builder.Services.AddHealthChecks();
 
+builder.Services.Configure<StockAlertOptions>(builder.Configuration.GetSection(StockAlertOptions.SectionName));
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 

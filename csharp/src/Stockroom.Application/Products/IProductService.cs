@@ -12,5 +12,7 @@ public interface IProductService
 
     Task<ProductDto> RestockAsync(Guid id, RestockRequest request, CancellationToken cancellationToken);
 
+    Task<ProductDto> ChangeReorderThresholdAsync(Guid id, ChangeReorderThresholdRequest request, CancellationToken cancellationToken);
+
     Task DiscontinueAsync(Guid id, CancellationToken cancellationToken);
 }

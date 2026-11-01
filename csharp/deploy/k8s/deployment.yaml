@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stockroom-api
+  labels:
+    app.kubernetes.io/name: stockroom-api
+    app.kubernetes.io/part-of: stockroom
+spec:
+  # SQLite is a single file on a ReadWriteOnce volume: one writer, replaced rather than rolled.
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: stockroom-api
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: stockroom-api
+        app.kubernetes.io/part-of: stockroom
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/mantish-dev/stockroom-api:1.1.0
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Production
+            - name: ConnectionStrings__Stockroom
+              value: Data Source=/data/stockroom.db
+            - name: StockAlerts__DefaultReorderThreshold
+              value: "10"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 384Mi
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: stockroom-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: stockroom-api
+  labels:
+    app.kubernetes.io/name: stockroom-api
+spec:
+  selector:
+    app.kubernetes.io/name: stockroom-api
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
